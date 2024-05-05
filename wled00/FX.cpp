@@ -4861,6 +4861,49 @@ static const char _data_FX_MODE_FLOWSTRIPE[] PROGMEM = "Flow Stripe@Hue speed,Ef
 #define XY(x,y) SEGMENT.XY(x,y)
 
 
+#ifdef WLED_USE_AA_PIXELS
+/////////////////////////////
+//    2D Analog Clock      //
+/////////////////////////////
+uint16_t mode_2DAnalogClock(void) {                  // By Andras Fekete (bandi13)
+  if (!strip.isMatrix) return mode_static(); // not a 2D set-up
+
+  const uint16_t cols = SEGMENT.virtualWidth();
+  const uint16_t rows = SEGMENT.virtualHeight();
+  const uint16_t centerX = cols >> 1;
+  const uint16_t centerY = rows >> 1;
+  const uint16_t radius = min(centerX, centerY);
+
+  time_t hours_in_day = (localTime / (60 * 60)) % 12;
+  time_t minutes_in_day = (localTime / (60)) % 60;
+  time_t seconds_in_day = (localTime) % 60;
+
+  float hour_angle = radians(360 * (hours_in_day + minutes_in_day / 60.0) / 12 - 90);
+  uint16_t hour_len = radius * 0.5;
+  uint16_t hour_x = centerX + hour_len * cos_t(hour_angle);
+  uint16_t hour_y = centerY + hour_len * sin_t(hour_angle);
+
+  float minute_angle = radians(360 * (minutes_in_day + seconds_in_day / 60.0) / 60 - 90);
+  uint16_t minute_len = radius * 0.7;
+  uint16_t minute_x = centerX + minute_len * cos_t(minute_angle);
+  uint16_t minute_y = centerY + minute_len * sin_t(minute_angle);
+
+  float second_angle = radians(360 * seconds_in_day / 60 - 90);
+  uint16_t second_len = radius * 0.9;
+  uint16_t second_x = centerX + second_len * cos_t(second_angle);
+  uint16_t second_y = centerY + second_len * sin_t(second_angle);
+
+  SEGMENT.fill(BLACK);
+  SEGMENT.drawCircleAntialiased(centerX, centerY, radius, 0x333333);
+  SEGMENT.drawLineAntialiased(centerX, centerY, second_x, second_y, BLUE);
+  SEGMENT.drawLineAntialiased(centerX, centerY, minute_x, minute_y, GREEN);
+  SEGMENT.drawLineAntialiased(centerX, centerY, hour_x, hour_y, RED);
+
+  return (1000 / WLED_FPS); // calculate once per second
+} // mode_2DAnalogClock()
+static const char _data_FX_MODE_2DANALOGCLOCK[] PROGMEM = "Analog Clock 2D@;";
+#endif
+
 // Black hole
 uint16_t mode_2DBlackHole(void) {            // By: Stepko https://editor.soulmatelights.com/gallery/1012 , Modified by: Andrew Tuline
   if (!strip.isMatrix || !SEGMENT.is2D()) return mode_static(); // not a 2D set-up
@@ -8092,6 +8135,9 @@ void WS2812FX::setupEffectData() {
 
   addEffect(FX_MODE_2DGEQ, &mode_2DGEQ, _data_FX_MODE_2DGEQ); // audio
 
+#ifdef WLED_USE_AA_PIXELS
+  addEffect(FX_MODE_2DANALOGCLOCK, &mode_2DAnalogClock, _data_FX_MODE_2DANALOGCLOCK);
+#endif
   addEffect(FX_MODE_2DNOISE, &mode_2Dnoise, _data_FX_MODE_2DNOISE);
 
   addEffect(FX_MODE_2DFIRENOISE, &mode_2Dfirenoise, _data_FX_MODE_2DFIRENOISE);

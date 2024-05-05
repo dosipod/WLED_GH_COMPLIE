@@ -313,8 +313,9 @@
 #define FX_MODE_WAVESINS               184
 #define FX_MODE_ROCKTAVES              185
 #define FX_MODE_2DAKEMI                186
+#define FX_MODE_2DANALOGCLOCK          187
 
-#define MODE_COUNT                     187
+#define MODE_COUNT                     188
 
 typedef enum mapping1D2D {
   M12_Pixels = 0,
@@ -625,9 +626,13 @@ typedef struct Segment {
     void moveY(int8_t delta, bool wrap = false);
     void move(uint8_t dir, uint8_t delta, bool wrap = false);
     void draw_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
+    #ifdef WLED_USE_AA_PIXELS
+    void drawCircleAntialiased(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
+    #endif
     void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
     void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
     inline void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void drawLineAntialiased(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
     void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color, uint32_t col2 = 0, int8_t rotate = 0);
     inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
     inline void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c, CRGB c2, int8_t rotate = 0) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0), RGBW32(c2.r,c2.g,c2.b,0), rotate); } // automatic inline
